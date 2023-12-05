@@ -15,17 +15,32 @@ import java.util.List;
 public class ProdutoController {
 
     private final ProdutoRepository repository;
-
-    @GetMapping
-    public List<Produto> findAll(){
+    @GetMapping()
+    public List<Produto> list(){
         return repository.findAll();
     }
     @GetMapping("/{id}")
-    public Produto findById(@PathVariable long id){
-        return repository.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND));
+    public Produto findByID(@PathVariable long id)
+    {
+        return repository
+                .findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
-    @PostMapping
+    @DeleteMapping("/{id}")
+    public void delete(@PathVariable long id) {
+        repository.findAndDelete(id);
+    }
+    @PostMapping()
     public Produto insert(@RequestBody Produto produto){
         return repository.save(produto);
     }
+
+    @PutMapping("/{id}")
+    public Produto update(@PathVariable long id, @RequestBody Produto produto){
+        final var msg = "O ID informado não conincide com o ID do objeto enviado.";
+        if(id != produto.getId())
+            throw new ResponseStatusException(HttpStatus.CONFLICT, msg);
+        return repository.save(produto);
+    }
+
 }
